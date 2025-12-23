@@ -1,23 +1,23 @@
-from flask import render_template,Flask,request,Response
-from prometheus_client import Counter,generate_latest
+from flask import render_template,Flask,request
+from prometheus_flask_exporter import PrometheusMetrics
 from flipkart.data_ingestion import DataIngestor
 from flipkart.rag_chain import RAGChainBuilder
 
 from dotenv import load_dotenv
 load_dotenv()
 
-REQUEST_COUNT = Counter("http_requests_total" , "Total HTTP Request")
+
 
 def create_app():
 
     app = Flask(__name__)
+    metrics = PrometheusMetrics(app)
 
     vector_store = DataIngestor().ingest(load_existing=True)
     rag_chain = RAGChainBuilder(vector_store).build_chain()
 
     @app.route("/")
     def index():
-        REQUEST_COUNT.inc()
         return render_template("index.html")
     
     @app.route("/get" , methods=["POST"])
@@ -32,9 +32,7 @@ def create_app():
 
         return reponse
     
-    @app.route("/metrics")
-    def metrics():
-        return Response(generate_latest(), mimetype="text/plain")
+
     
     return app
 

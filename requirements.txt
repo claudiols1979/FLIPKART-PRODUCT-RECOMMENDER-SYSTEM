@@ -9,4 +9,5 @@ python-dotenv
 pandas
 flask
 prometheus_client
+prometheus-flask-exporter
 
